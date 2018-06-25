@@ -29,9 +29,23 @@ export default {
         }
     },
     components: { weixinConfig, copywritingConfig, goodsLib, timingSend },
+    mounted(){
+      var _this = this;
+      socket.on('wxPassFriend', function (data) {
+        if(data.result === "success"){
+          this.$notify({
+            title: '好友申请',
+            message: `通过了 ${data.data.name} 好友请求`,
+            type: 'success'
+          });
+        }
+      });
+    },
     methods: {
         handleClick(tab, event){
-
+            if(tab.index == 2){
+                socket.emit('getGoods','');
+            }
         }
     }
 }

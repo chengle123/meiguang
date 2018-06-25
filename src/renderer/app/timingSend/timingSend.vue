@@ -1,13 +1,13 @@
 <template>
   <div>
-    每隔 <el-input-number v-model="num8" controls-position="right" @change="handleChange" :min="150"></el-input-number> 秒，发送一次
-    <el-button type="primary" size="small" plain>开始发单</el-button>
-    <el-button type="danger" size="small" plain>停止发单</el-button>
+    每隔 <el-input-number v-model="second" controls-position="right" @change="handleChange" :min="150"></el-input-number> 秒，发送一次
+    <el-button type="primary" size="small" plain v-if="releaseType" @click="release('start')" :disabled="!wxType">开始发单</el-button>
+    <el-button type="danger" size="small" plain v-if="!releaseType" @click="release('end')">停止发单</el-button>
     <div>
       <el-table
         height="450"
         ref="multipleTable"
-        :data="tableData3"
+        :data="selectGoodsList"
         tooltip-effect="dark"
         style="width: 100%">
         <el-table-column
@@ -38,8 +38,9 @@
   export default {
     data () {
       return {
-        num8: 150,
-        tableData3: [{
+        releaseType:true,
+        second: 150,
+        selectGoodsList: [{
           date: '2016-05-03',
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄',
@@ -78,8 +79,44 @@
         multipleSelection: []
       }
     },
+    mounted(){
+      var _this = this;
+      socket.on('progressRelease', function (data) {
+        _this.goodsList = data.data.list;
+        if(data.result === "success"){
+          this.$notify({
+            title: '发送成功',
+            message: data.data.accomplish.name+'--发送成功',
+            type: 'success'
+          });
+        }else{
+          this.$notify({
+            title: '发送失败',
+            message: data.data.accomplish.name+'--发送失败',
+            type: 'error'
+          });
+        }
+      });
+      socket.on('release',function(data){
+        _this.$message({
+            type: data.result,
+            message: data.msg
+        });
+      });
+    },
     methods: {
-      
+      release(type){
+        var _this = this;
+        if(type == 'start'){
+          this.releaseType = false;
+          socket.emit('startRelease',{
+            second: _this.second
+          });
+        }else{
+          this.releaseType = true;
+          socket.emit('endRelease','');
+        }
+      }
     }
   }
 </script>

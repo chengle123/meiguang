@@ -1,11 +1,11 @@
 <template>
   <div>
-    <el-button type="primary" size="small" plain>确认商品</el-button>
+    <el-button type="primary" size="small" plain @click="selectGoods">确认商品</el-button>
     <div>
       <el-table
         height="450"
         ref="multipleTable"
-        :data="tableData3"
+        :data="goodsList"
         tooltip-effect="dark"
         style="width: 100%"
         @selection-change="handleSelectionChange">
@@ -44,7 +44,7 @@
   export default {
     data () {
       return {
-        tableData3: [{
+        goodsList: [{
           date: '2016-05-03',
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄',
@@ -83,10 +83,22 @@
         multipleSelection: []
       }
     },
+    mounted(){
+      var _this = this;
+      socket.on('getGoods', function (data) {
+        if(data.result === "success"){
+          _this.goodsList = data.data;
+        }
+      });
+    },
     methods: {
       handleSelectionChange(val) {
         console.log(val)
         this.multipleSelection = val;
+        
+      },
+      selectGoods(){
+
       }
     }
   }

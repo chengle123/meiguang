@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from 'electron'
-import { Wechaty } from 'wechaty';
 
 /**
  * Set `__static` path to static files in production
@@ -27,9 +26,11 @@ function createWindow () {
     maxWidth:1000,
     resizable: false,
     maximizable:false,
-    useContentSize: true
+    useContentSize: true,
+    webPreferences: {webSecurity: false}
   })
 
+  mainWindow.setMenu(null)
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
@@ -73,33 +74,162 @@ app.on('ready', () => {
 
 
 //  服务
-const express = require('express');
-const router = express.Router();
-const bodyParser= require('body-parser');
+// const express = require('express');
+// const router = express.Router();
+// const bodyParser= require('body-parser');
+let io = require('socket.io')(8990);
+const Wechat = require('wechat4u');
+const fs = require('fs');
+const path = require('path');
+const extend = require('node.extend');
 
-// Wechaty.instance() // Global Instance
-// .on('scan', (qrcode, status) => console.log(`Scan QR Code to login: ${status}\n${qrcode}`))
-// .on('login',            user => console.log(`User ${user} logined`))
-// .on('message',       message => console.log(`Message: ${message}`))
-// .start()
+let USERDATA_PATH = app.getPath('userData');
+let bot = new Wechat();
+let configs = {};
 
-var appServer = express();
-appServer.use(bodyParser.json({limit:'50mb'}));
-appServer.use(bodyParser.urlencoded({ limit:'50mb', extended: false }));
-var server = appServer.listen(8989, function() {
-    console.log('服务启动...');
-});
-
-router.post('/abc',(req,res)=>{
-  try{
-
-  }catch(e){
-    return res.json({
-      result: 'error',
-      data: [],
-      msg: '失败'
-    });
-  }
+io.on('connection', function(socket) {
+  // 获取二维码登录
+  socket.on('wxLogin', function(data) {
+    try{
+        if (bot.PROP.uin) {
+            // 存在登录数据时，可以随时调用restart进行重启
+            bot.restart();
+        } else {
+            bot.start();
+            bot.on('uuid', uuid => {
+              io.sockets.emit('wxLogin', {
+                  result: 'success',
+                  data: {url:'https://login.weixin.qq.com/qrcode/' + uuid},
+                  msg: '二维码获取成功'
+              });
+            });
+        }
+    }catch(e){
+        io.sockets.emit('wxLogin', {
+            result: 'error',
+            data: [],
+            msg: '二维码获取失败'
+        });
+    }
+  });
+  // 确认微信配置
+  socket.on('queryWX', function(data) {
+    try{
+        configs = extend(configs, data);
+        if(configs.wxPassFriend){
+          bot.on('message', msg => {
+            if (msg.MsgType == bot.CONF.MSGTYPE_VERIFYMSG) {
+              bot.verifyUser(msg.RecommendInfo.UserName, msg.RecommendInfo.Ticket)
+              .then(res => {
+                io.sockets.emit('wxPassFriend', {
+                    result: 'success',
+                    data: {name:bot.Contact.getDisplayName(msg.RecommendInfo)},
+                    msg: '好友确认通过'
+                });
+              })
+              .catch(err => {
+                
+              })
+            }
+          })
+        }
+        io.sockets.emit('queryWX', {
+            result: 'success',
+            data: [],
+            msg: '微信配置成功'
+        });
+    }catch(e){
+        io.sockets.emit('queryWX', {
+            result: 'error',
+            data: [],
+            msg: '微信配置失败'
+        });
+    }
+  });
+  // 开始发单
+  socket.on('startRelease', function(data) {
+    try{
+        configs = extend(configs, data);
+        io.sockets.emit('release', {
+            result: 'success',
+            data: [],
+            msg: '定时发单启动成功'
+        });
+    }catch(e){
+        io.sockets.emit('release', {
+            result: 'error',
+            data: [],
+            msg: '定时发单启动失败'
+        });
+    }
+  });
+  // 停止发单
+  socket.on('endRelease', function() {
+    try{
+        //=============???????????
+        io.sockets.emit('release', {
+            result: 'success',
+            data: [],
+            msg: '已经停止发单'
+        });
+    }catch(e){
+        io.sockets.emit('release', {
+            result: 'error',
+            data: [],
+            msg: '停止发单失败'
+        });
+    }
+  });
+  var userAvatar;
+  bot.on('user-avatar', avatar => {
+    userAvatar = avatar;
+  })
+  bot.on('login', () => {
+      var contacts = bot.contacts;
+      var contact = [];
+      for(var key in contacts){
+        if(contacts[key].ContactFlag == 0 && contacts[key].MemberList.length>0){
+          contact.push(contacts[key]);
+        }
+      }
+      io.sockets.emit('user-avatar', {
+          result: 'success',
+          data: {
+            url: userAvatar,
+            userName: bot.user.NickName,
+            contacts: contact
+          },
+          msg: '登录成功'
+      });
+  })
+  
 })
 
-appServer.use('/',router);
+// var appServer = express();
+// appServer.use(bodyParser.json({limit:'50mb'}));
+// appServer.use(bodyParser.urlencoded({ limit:'50mb', extended: false }));
+// var server = appServer.listen(8989, function() {
+//     console.log('服务启动...');
+// });
+
+// router.post('/getUuid',(req,res)=>{
+//     try{
+//         if (bot.PROP.uin) {
+//             // 存在登录数据时，可以随时调用restart进行重启
+//             bot.restart();
+//         } else {
+//             bot.start();
+//             bot.on('uuid', uuid => {
+//                     console.log('二维码链接：', 'https://login.weixin.qq.com/qrcode/' + uuid)
+//             });
+//         }
+//     }catch(e){
+//         return res.json({
+//             result: 'error',
+//             data: [],
+//             msg: '失败'
+//         });
+//     }
+// })
+
+// appServer.use('/',router);
