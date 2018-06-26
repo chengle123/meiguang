@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-button type="primary" size="small" plain @click="search">搜索</el-button>
     <el-button type="primary" size="small" plain @click="selectGoods">确认商品</el-button>
     <div>
       <el-table
@@ -8,32 +9,34 @@
         :data="goodsList"
         tooltip-effect="dark"
         style="width: 100%"
+        v-loading="loading"
         @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
           width="55">
         </el-table-column>
         <el-table-column
-          prop="date"
+          prop="ShowTitle"
           label="商品名称"
           width="150"
           sortable
           show-overflow-tooltip>
-          <template slot-scope="scope">{{ scope.row.date }}</template>
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="ShowPrice"
           label="商品价格"
           sortable>
+          <template slot-scope="scope">{{ scope.row.ShowPrice * 100 / 10000 }}元</template>
         </el-table-column>
         <el-table-column
-          prop="address"
+          prop="SealCount"
           label="商品销量">
         </el-table-column>
         <el-table-column
-          prop="abc"
+          prop="QuanAmount"
           label="优惠券"
           sortable>
+          <template slot-scope="scope">{{ scope.row.QuanAmount * 100 / 10000 }}元</template>
         </el-table-column>
       </el-table>
     </div>
@@ -44,61 +47,33 @@
   export default {
     data () {
       return {
-        goodsList: [{
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '30'
-        }, {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '25'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '10'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '20'
-        }, {
-          date: '2016-05-08',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '5'
-        }, {
-          date: '2016-05-06',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '20'
-        }, {
-          date: '2016-05-07',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '10'
-        }],
-        multipleSelection: []
+        goodsList: [],
+        multipleSelection: [],
+        loading: false
       }
     },
     mounted(){
       var _this = this;
-      socket.on('getGoods', function (data) {
+      socket.on('getGoodsList', function (data) {
         if(data.result === "success"){
           _this.goodsList = data.data;
+          _this.loading = false;
         }
       });
     },
     methods: {
       handleSelectionChange(val) {
-        console.log(val)
-        this.multipleSelection = val;
-        
+        this.multipleSelection = val
       },
       selectGoods(){
-
+        var _this = this;
+        socket.emit('setChosenList',{
+          chosenList: _this.multipleSelection
+        });
+      },
+      search(){
+        socket.emit('getGoodsList','');
+        this.loading = true;
       }
     }
   }

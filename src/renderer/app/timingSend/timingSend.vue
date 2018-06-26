@@ -1,33 +1,39 @@
 <template>
   <div>
-    每隔 <el-input-number v-model="second" controls-position="right" @change="handleChange" :min="150"></el-input-number> 秒，发送一次
-    <el-button type="primary" size="small" plain v-if="releaseType" @click="release('start')" :disabled="!wxType">开始发单</el-button>
+    每隔 <el-input-number v-model="second" controls-position="right" :min="150"></el-input-number> 秒，发送一次
+    <el-button type="primary" size="small" plain v-if="releaseType" @click="release('start')" :disabled="!wxSet">开始发单</el-button>
     <el-button type="danger" size="small" plain v-if="!releaseType" @click="release('end')">停止发单</el-button>
     <div>
       <el-table
         height="450"
         ref="multipleTable"
-        :data="selectGoodsList"
+        :data="chosenList"
         tooltip-effect="dark"
         style="width: 100%">
         <el-table-column
-          prop="date"
+          prop="ShowTitle"
           label="商品名称"
-          width="150"
-          show-overflow-tooltip>
-          <template slot-scope="scope">{{ scope.row.date }}</template>
+          show-overflow-tooltip
+          width="150">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="ShowPrice"
           label="商品价格">
+          <template slot-scope="scope">{{ scope.row.ShowPrice * 100 / 10000 }}元</template>
         </el-table-column>
         <el-table-column
-          prop="abc"
+          prop="QuanAmount"
           label="优惠券">
+          <template slot-scope="scope">{{ scope.row.QuanAmount * 100 / 10000 }}元</template>
         </el-table-column>
         <el-table-column
-          prop="abc"
+          prop="GoodsType"
           label="状态">
+          <template slot-scope="scope">
+            <span v-if="!scope.row.GoodsType">等待发送</span>
+            <span style="color:#F56C6C;" v-if="scope.row.GoodsType && scope.row.GoodsType == '失败'">失败</span>
+            <span style="color:#67C23A;" v-if="scope.row.GoodsType && scope.row.GoodsType == '成功'">成功</span>
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -40,57 +46,22 @@
       return {
         releaseType:true,
         second: 150,
-        selectGoodsList: [{
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '30'
-        }, {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '25'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '10'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '20'
-        }, {
-          date: '2016-05-08',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '5'
-        }, {
-          date: '2016-05-06',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '20'
-        }, {
-          date: '2016-05-07',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄',
-          abc: '10'
-        }],
-        multipleSelection: []
+        chosenList: [],
+        wxSet:false
       }
     },
     mounted(){
       var _this = this;
       socket.on('progressRelease', function (data) {
-        _this.goodsList = data.data.list;
+        _this.chosenList = data.data.chosenList;
         if(data.result === "success"){
-          this.$notify({
+          _this.$notify({
             title: '发送成功',
             message: data.data.accomplish.name+'--发送成功',
             type: 'success'
           });
         }else{
-          this.$notify({
+          _this.$notify({
             title: '发送失败',
             message: data.data.accomplish.name+'--发送失败',
             type: 'error'
@@ -102,6 +73,21 @@
             type: data.result,
             message: data.msg
         });
+      });
+      socket.on('setChosenList',function(data){
+        if(data.result == 'success'){
+          _this.chosenList = data.data
+        }else{
+          _this.$message({
+              type: data.result,
+              message: data.msg
+          });
+        }
+      });
+      socket.on('queryWX', function (data) {
+        if(data.result == 'success'){
+          _this.wxSet = true;
+        }
       });
     },
     methods: {

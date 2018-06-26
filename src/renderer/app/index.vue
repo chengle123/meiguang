@@ -43,9 +43,7 @@ export default {
     },
     methods: {
         handleClick(tab, event){
-            if(tab.index == 2){
-                socket.emit('getGoods','');
-            }
+            
         }
     }
 }
