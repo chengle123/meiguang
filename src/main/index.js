@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron'
+const opn = require('opn');
 
 const http = require('http');
 const querystring = require('querystring');
@@ -44,6 +45,11 @@ function createWindow () {
 
   mainWindow.setMenu(null)
   mainWindow.loadURL(winURL)
+
+  mainWindow.webContents.on('new-window', (event,url) => {
+    opn(url)
+    event.preventDefault()
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null
