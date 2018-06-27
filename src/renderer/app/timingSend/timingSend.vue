@@ -17,14 +17,30 @@
           width="150">
         </el-table-column>
         <el-table-column
-          prop="ShowPrice"
-          label="商品价格">
-          <template slot-scope="scope">{{ scope.row.ShowPrice * 100 / 10000 }}元</template>
+          prop="TgPic"
+          label="图片">
+          <template slot-scope="scope">
+            <img :src="scope.row.TgPic" style="width:60px;height:60px;">
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="AfterDiscount"
+          label="券后价"
+          >
+          <template slot-scope="scope">{{ scope.row.AfterDiscount }}元</template>
         </el-table-column>
         <el-table-column
           prop="QuanAmount"
           label="优惠券">
           <template slot-scope="scope">{{ scope.row.QuanAmount * 100 / 10000 }}元</template>
+        </el-table-column>
+        <el-table-column
+          prop="IsTmall"
+          label="来源">
+          <template slot-scope="scope">
+            <img src="../images/taobao.png" class="taobao" v-if="scope.row.IsTmall == 0">
+            <img src="../images/tianmao.jpg" class="tianmao" v-if="scope.row.IsTmall == 1">
+          </template>
         </el-table-column>
         <el-table-column
           prop="GoodsType"

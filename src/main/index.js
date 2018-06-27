@@ -259,6 +259,7 @@ io.on('connection', function(socket) {
             for(var i = 0; i< data.length; i++){
               if(data[i].ListItem){
                 data[i].ListItem.map(item=>{
+                  item.AfterDiscount = (item.ShowPrice - item.QuanAmount) * 100 / 10000
                   arr.push(item);
                 });
               }
@@ -412,7 +413,7 @@ io.on('connection', function(socket) {
           var text = configs.textTemplate.replace('{商品名称}',notArr[0].ShowTitle)
                                           .replace('{商品价格}',notArr[0].ShowPrice*100/10000)
                                           .replace('{券价格}',notArr[0].QuanAmount*100/10000)
-                                          .replace('{券后价格}',(notArr[0].ShowPrice - notArr[0].QuanAmount)*100/10000)
+                                          .replace('{券后价格}',notArr[0].AfterDiscount)
                                           .replace('{淘口令}',command)
                                           .replace('{短连接}',miniUrl)
                                           .replace('{商品文案}',notArr[0].Recommend);

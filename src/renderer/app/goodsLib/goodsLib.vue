@@ -18,15 +18,20 @@
         <el-table-column
           prop="ShowTitle"
           label="商品名称"
-          width="150"
-          sortable
-          show-overflow-tooltip>
+          width="150">
         </el-table-column>
         <el-table-column
-          prop="ShowPrice"
-          label="商品价格"
+          prop="TgPic"
+          label="图片">
+          <template slot-scope="scope">
+            <img :src="scope.row.TgPic" style="width:60px;height:60px;">
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="AfterDiscount"
+          label="券后价"
           sortable>
-          <template slot-scope="scope">{{ scope.row.ShowPrice * 100 / 10000 }}元</template>
+          <template slot-scope="scope">{{ scope.row.AfterDiscount }}元</template>
         </el-table-column>
         <el-table-column
           prop="SealCount"
@@ -37,6 +42,16 @@
           label="优惠券"
           sortable>
           <template slot-scope="scope">{{ scope.row.QuanAmount * 100 / 10000 }}元</template>
+        </el-table-column>
+        <el-table-column
+          prop="IsTmall"
+          label="来源"
+          :filters="[{ text: '淘宝', value: '0' }, { text: '天猫', value: '1' }]"
+          :filter-method="filterTag">
+          <template slot-scope="scope">
+            <img src="../images/taobao.png" class="taobao" v-if="scope.row.IsTmall == 0">
+            <img src="../images/tianmao.jpg" class="tianmao" v-if="scope.row.IsTmall == 1">
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -62,6 +77,9 @@
       });
     },
     methods: {
+      filterTag(value, row) {
+        return row.IsTmall == value;
+      },
       handleSelectionChange(val) {
         this.multipleSelection = val
       },
@@ -78,3 +96,11 @@
     }
   }
 </script>
+<style>
+.taobao,
+.tianmao{
+  width:30px;
+  height:30px;
+  border-radius: 5px;
+}
+</style>
