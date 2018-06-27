@@ -18,7 +18,11 @@
         <el-table-column
           prop="ShowTitle"
           label="商品名称"
-          width="150">
+          >
+          <template slot-scope="scope">
+            <a :href="'https://item.taobao.com/item.htm?id='+scope.row.ItemId" target="_blank" v-if="scope.row.IsTmall == 0">{{ scope.row.ShowTitle }}</a>
+            <a :href="'https://detail.tmall.com/item.htm?id='+scope.row.ItemId" target="_blank" v-if="scope.row.IsTmall == 1">{{ scope.row.ShowTitle }}</a>
+          </template>
         </el-table-column>
         <el-table-column
           prop="TgPic"
@@ -102,5 +106,9 @@
   width:30px;
   height:30px;
   border-radius: 5px;
+}
+a {
+  text-decoration:none;
+  color:#409EFF;
 }
 </style>
