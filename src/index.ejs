@@ -18,6 +18,11 @@
       if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
     </script>
     <script>
+      document.addEventListener('mousewheel', function(e) {
+          if(e.ctrlKey) {
+              e.preventDefault();
+          }
+      });
       socket = io.connect('http://localhost:8990');
     </script>
 

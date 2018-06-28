@@ -1,7 +1,7 @@
 <template>
   <div>
     每隔 <el-input-number v-model="second" controls-position="right" :min="150"></el-input-number> 秒，发送一次
-    <el-button type="primary" size="small" plain v-if="releaseType" @click="release('start')" :disabled="!wxSet">开始发单</el-button>
+    <el-button type="primary" size="small" plain v-if="releaseType" @click="release('start')" :disabled="!wxSet && chosenList.length == 0">开始发单</el-button>
     <el-button type="danger" size="small" plain v-if="!releaseType" @click="release('end')">停止发单</el-button>
     <div>
       <el-table

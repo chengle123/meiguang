@@ -20,16 +20,17 @@
         </div>
       </el-col>
       <el-col :span="8" >
-        <div class="border-box pb20" style="height:340px;">
+        <div class="border-box pb20" style="height:310px;margin-bottom:0">
           <h3>选择发单组</h3>
           <div style="overflow: hidden;height:100%;">
-            <div style="overflow:auto;height:340px;">
+            <div style="overflow:auto;height:310px;">
               <el-checkbox-group v-model="pushAddress">
                 <el-checkbox v-for="item in wxContacts" :label="item.NickName" :disabled="pushAddress.length==1 && pushAddress[0] != item.NickName">{{ item.NickName }}</el-checkbox>
               </el-checkbox-group>
             </div>
           </div>
         </div>
+        <el-button type="text" @click="refreshFlock" v-show="wxType">刷新群组</el-button>
       </el-col>
       <el-col :span="8">
         <div class="border-box pb20">
@@ -93,6 +94,16 @@
             message: data.msg
         });
       });
+      socket.on('refreshFlock', function (data) {
+        if(data.result === "success"){
+          console.log(data.data)
+          _this.wxContacts = data.data;
+        }
+        _this.$message({
+            type: data.result,
+            message: data.msg
+        });
+      });
     },
     methods: {
       gitWxLogin(){
@@ -125,6 +136,9 @@
           wxPassFriend: _this.wxPassFriend,
           wxContacts: select
         });
+      },
+      refreshFlock(){
+        socket.emit('refreshFlock','');
       }
     }
   }

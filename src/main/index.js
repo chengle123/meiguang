@@ -1,5 +1,12 @@
 import { app, BrowserWindow } from 'electron'
 const opn = require('opn');
+const os=require('os');
+
+var type=os.type();
+var hostname=os.hostname();
+var cpu = os.cpus();
+var equipmentId = hostname+'/'+type+'/'+cpu.length+'/'+cpu[0].model+'/'+cpu[0].speed
+// console.log(equipmentId)
 
 const http = require('http');
 const querystring = require('querystring');
@@ -167,7 +174,17 @@ let configs = {
 let timeing;
 
 io.on('connection', function(socket) {
-
+  // 获取设备吗
+  socket.on('equipmentId', function(data) {
+    try{
+      io.sockets.emit('equipmentId', {
+          result: 'success',
+          data: {equipmentId:equipmentId},
+          msg: '设备标识码'
+      });
+    }catch(e){
+    }
+  });
   // 获取二维码登录
   socket.on('wxLogin', function(data) {
     try{
@@ -348,6 +365,30 @@ io.on('connection', function(socket) {
       });
     }
   });
+
+  // 刷新群
+  socket.on('refreshFlock', function() {
+    try{
+      var contacts = bot.contacts;
+      var contact = [];
+      for(var key in contacts){
+        if(contacts[key].MemberList.length>0){
+          contact.push(contacts[key]);
+        }
+      }
+      io.sockets.emit('refreshFlock', {
+        result: 'success',
+        data: contact,
+        msg: '刷新成功'
+      });
+    }catch(e){
+      io.sockets.emit('refreshFlock', {
+        result: 'error',
+        data: [],
+        msg: '刷新失败'
+      });
+    }
+  });
   
   bot.on('user-avatar', avatar => {
     configs.userAvatar = avatar;
@@ -356,7 +397,7 @@ io.on('connection', function(socket) {
       var contacts = bot.contacts;
       var contact = [];
       for(var key in contacts){
-        if(contacts[key].ContactFlag == 0 && contacts[key].MemberList.length>0){
+        if(contacts[key].MemberList.length>0){
           contact.push(contacts[key]);
         }
       }
@@ -430,37 +471,15 @@ io.on('connection', function(socket) {
               file: request(notArr[0].TgPic),
               filename: notArr[0].TgPic.split('.cn/')[1]
             }, configs.wxContacts.UserName)
+            .then(res =>{
+              sendText(notArr, alreadyArr, text);
+            })
             .catch(err => {
               bot.emit('error', err)
             })
+          }else{
+            sendText(notArr, alreadyArr, text);
           }
-          bot.sendMsg(text, configs.wxContacts.UserName).then(res => {
-            notArr[0].GoodsType = '成功';
-            configs.chosenList = alreadyArr.concat(notArr);
-            io.sockets.emit('progressRelease', {
-                result: 'success',
-                data: {
-                  chosenList: configs.chosenList,
-                  accomplish: {
-                    name: notArr[0].ShowTitle
-                  }
-                },
-                msg: '商品发送成功'
-            });
-          }).catch(err => {
-            notArr[0].GoodsType = '失败';
-            configs.chosenList = alreadyArr.concat(notArr);
-            io.sockets.emit('progressRelease', {
-                result: 'error',
-                data: {
-                  chosenList: configs.chosenList,
-                  accomplish: {
-                    name: notArr[0].ShowTitle
-                  }
-                },
-                msg: '商品发送失败'
-            });
-          })
         }); 
       });
       req.write(querystring.stringify({
@@ -472,33 +491,33 @@ io.on('connection', function(socket) {
         timerFn();
       },configs.second*1000);
   }
+  function sendText(notArr,alreadyArr,text){
+    bot.sendMsg(text, configs.wxContacts.UserName).then(res => {
+      notArr[0].GoodsType = '成功';
+      configs.chosenList = alreadyArr.concat(notArr);
+      io.sockets.emit('progressRelease', {
+          result: 'success',
+          data: {
+            chosenList: configs.chosenList,
+            accomplish: {
+              name: notArr[0].ShowTitle
+            }
+          },
+          msg: '商品发送成功'
+      });
+    }).catch(err => {
+      notArr[0].GoodsType = '失败';
+      configs.chosenList = alreadyArr.concat(notArr);
+      io.sockets.emit('progressRelease', {
+          result: 'error',
+          data: {
+            chosenList: configs.chosenList,
+            accomplish: {
+              name: notArr[0].ShowTitle
+            }
+          },
+          msg: '商品发送失败'
+      });
+    })
+  }
 })
-
-// var appServer = express();
-// appServer.use(bodyParser.json({limit:'50mb'}));
-// appServer.use(bodyParser.urlencoded({ limit:'50mb', extended: false }));
-// var server = appServer.listen(8989, function() {
-//     console.log('服务启动...');
-// });
-
-// router.post('/getUuid',(req,res)=>{
-//     try{
-//         if (bot.PROP.uin) {
-//             // 存在登录数据时，可以随时调用restart进行重启
-//             bot.restart();
-//         } else {
-//             bot.start();
-//             bot.on('uuid', uuid => {
-//                     console.log('二维码链接：', 'https://login.weixin.qq.com/qrcode/' + uuid)
-//             });
-//         }
-//     }catch(e){
-//         return res.json({
-//             result: 'error',
-//             data: [],
-//             msg: '失败'
-//         });
-//     }
-// })
-
-// appServer.use('/',router);

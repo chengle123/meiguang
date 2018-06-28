@@ -14,12 +14,12 @@ export default new Router({
       redirect: '/'
     },
     {
-      path: '/login',
+      path: '/',
       name: 'login',
       component: require('@/app/login/login.vue').default
     },
     {
-      path: '/',
+      path: '/index',
       name: 'index',
       component: require('@/app/index.vue').default
     },

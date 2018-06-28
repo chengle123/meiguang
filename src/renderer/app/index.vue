@@ -23,6 +23,7 @@ import goodsLib from './goodsLib/goodsLib'
 import timingSend from './timingSend/timingSend'
 
 export default {
+    name: 'index',
     data(){
         return {
             activeName: 'weixin'
