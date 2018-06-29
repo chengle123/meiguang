@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美逛工具</title>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
@@ -18,11 +19,6 @@
       if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
     </script>
     <script>
-      document.addEventListener('mousewheel', function(e) {
-          if(e.ctrlKey) {
-              e.preventDefault();
-          }
-      });
       socket = io.connect('http://localhost:8990');
     </script>
 

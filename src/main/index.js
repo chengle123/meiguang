@@ -64,6 +64,8 @@ function createWindow () {
   })
 }
 
+require('electron-context-menu')();
+
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
@@ -149,9 +151,6 @@ app.on('ready', function()  {
 
 
 //  服务
-// const express = require('express');
-// const router = express.Router();
-// const bodyParser= require('body-parser');
 
 let configs = {
   userAvatar:'',
@@ -209,7 +208,7 @@ io.on('connection', function(socket) {
         });
     }
   });
-
+  
   // 确认微信配置
   socket.on('queryWX', function(data) {
     try{
@@ -411,6 +410,9 @@ io.on('connection', function(socket) {
           msg: '登录成功'
       });
   })
+  bot.setPollingIntervalGetter(function () {
+    return 2 * 60 * 1000;
+  });
 
   function timerFn(){
     var alreadyArr = [];
