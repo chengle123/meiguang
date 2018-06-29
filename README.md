@@ -40,11 +40,11 @@
 ---
 机器人交流群：125100084
 
-[1]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/1.png
-[2]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/2.png
-[3]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/3.png
-[4]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/4.png
-[5]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/5.png
-[6]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/6.png
-[7]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/7.png
-[8]: https://raw.githubusercontent.com/chengle123/meiguang/master/img/8.png
+[1]: https://github.com/chengle123/meiguang/blob/master/src/1.png
+[2]: https://github.com/chengle123/meiguang/blob/master/src/2.png
+[3]: https://github.com/chengle123/meiguang/blob/master/src/3.png
+[4]: https://github.com/chengle123/meiguang/blob/master/src/4.png
+[5]: https://github.com/chengle123/meiguang/blob/master/src/5.png
+[6]: https://github.com/chengle123/meiguang/blob/master/src/6.png
+[7]: https://github.com/chengle123/meiguang/blob/master/src/7.png
+[8]: https://github.com/chengle123/meiguang/blob/master/src/8.png
