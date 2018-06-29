@@ -154,7 +154,7 @@ app.on('ready', function()  {
 
 let configs = {
   userAvatar:'',
-  mgPid:'',
+  mgPid:'mm_116847654_42542764_791720985',
   wxPassFriend:'',
   wxContacts:'',
   chosenList:[],
@@ -429,28 +429,37 @@ io.on('connection', function(socket) {
       clearTimeout(timeing);
       return;
     }
+    var url = 'http://mk.xichegg.com/AppCms/index.html?ui=http://cdn.temzt.cn/AppCms/UI/sharedetail.html&pid='+configs.mgPid+'&itemid='+notArr[0].ItemId+'&invitecode='+configs.invitationCode;
     var reqUrl = http.request({
-        hostname: 'api.ft12.com',
-        method: 'GET',
-        path: '/api.php?url='+'http://mk.xichegg.com/AppCms/index.html?ui=http%3A%2F%2Fcdn.temzt.cn%2FAppCms%2FUI%2Fsharedetail.html&token=b9961385b4e64ad8b637e3bdf1d1a331&itemid='+notArr[0].ItemId+'&invitecode='+configs.invitationCode
+        hostname: 'www.ft12.com',
+        method: 'POST',
+        path: '/create.php?m=index&a=urlCreate',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'    
+        }
       }, function (res) {
-          var dataText = '';
+          var urlText = '';
           res.setEncoding('utf8'); 
           res.on('data', function (chunk) {
-              dataText += chunk;
+              urlText += chunk;
           }); 
           res.on('end', function () {
-            miniUrl = dataText;
+            miniUrl = JSON.parse(urlText).list;
+            console.log(miniUrl,1)
           }); 
       });
+      reqUrl.write(querystring.stringify({
+        url: url,
+        type: 4
+      }));
       reqUrl.end();
     var req = http.request({
           hostname: 'app.sitezt.cn',
           method: 'POST',
           path: '/api/itemdetail',
-          headers: {    
+          headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'    
-          } 
+          }
       }, function (res) {
         var dataText = '';
         res.setEncoding('utf8'); 
@@ -467,7 +476,7 @@ io.on('connection', function(socket) {
                                           .replace('{短连接}',miniUrl)
                                           .replace('{商品文案}',notArr[0].Recommend);
                                           
-          
+          console.log(miniUrl,2)
           if(configs.sendImg){
             bot.sendMsg({
               file: request(notArr[0].TgPic),

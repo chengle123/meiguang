@@ -14,12 +14,12 @@ export default new Router({
       redirect: '/'
     },
     {
-      path: '/',
+      path: process.env.NODE_ENV === 'development' ? '/login' : '/',
       name: 'login',
       component: require('@/app/login/login.vue').default
     },
     {
-      path: '/index',
+      path: process.env.NODE_ENV === 'development' ? '/' : '/index',
       name: 'index',
       component: require('@/app/index.vue').default
     },
