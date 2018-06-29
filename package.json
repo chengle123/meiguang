@@ -18,8 +18,8 @@
     "postinstall": "npm run electron-rebuild"
   },
   "build": {
-    "productName": "meiguang",
-    "appId": "org.simulatedgreg.electron-vue",
+    "productName": "美逛",
+    "appId": "org.chengle.meiguang",
     "directories": {
       "output": "build"
     },
