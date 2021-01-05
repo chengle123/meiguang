@@ -59,7 +59,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.21.1",
     "body-parser": "^1.18.3",
     "electron-baidu-tongji": "^1.0.2",
     "element-ui": "^2.4.1",
